@@ -2,11 +2,9 @@
 pragma solidity 0.8.18;
 
 contract MyToken {
-    // Token details
-    string public name;            // Token name
-    string public symbol;          // Token symbol
+    string public name;                       // Token name
+    string public symbol;                     // Token symbol
 
-    // Total supply and token balances
     uint256 public totalSupply;                // Total supply of tokens
     mapping(address => uint256) public balanceOf;    // Balances of token holders
 
@@ -15,8 +13,7 @@ contract MyToken {
     event Burn(address indexed from, uint256 value);                          // Event emitted when tokens are burned
     event Mint(address indexed to, uint256 value);                            // Event emitted when tokens are minted
 
-    // Contract owner
-    address public owner;
+    address public owner;                      // The owner of the contract
 
     // Modifier to allow only the contract owner to call certain functions
     modifier onlyOwner() {
@@ -25,34 +22,44 @@ contract MyToken {
     }
 
     // Constructor to initialize the token with an initial supply
-    constructor(string memory _name, string memory _symbol, uint256 _totalSupply) {
+    constructor(string memory _name, string memory _symbol, uint256 _initialSupply) {
         name = _name;
         symbol = _symbol;
-        totalSupply = _totalSupply;
-        balanceOf[msg.sender] = _totalSupply;  // Assign the total supply to the contract owner
-        owner = msg.sender;                    // Set the contract owner
+        totalSupply = _initialSupply;
+        balanceOf[msg.sender] = _initialSupply;  // Assign the initial supply to the contract owner
+        owner = msg.sender;                      // Set the contract owner
     }
 
-    // Function to transfer tokens from one address to another
+    // Function to transfer tokens from the sender's address to another address
     function transfer(address _to, uint256 _value) external {
+        require(_to != address(0), "Invalid recipient");            // Check if the recipient address is valid
         require(balanceOf[msg.sender] >= _value, "Insufficient balance");  // Check if the sender has enough tokens
-        balanceOf[msg.sender] -= _value;        // Deduct tokens from the sender's balance
-        balanceOf[_to] += _value;                // Add tokens to the recipient's balance
-        emit Transfer(msg.sender, _to, _value);  // Emit a transfer event
+
+        balanceOf[msg.sender] -= _value;         // Deduct tokens from the sender's balance
+        balanceOf[_to] += _value;                 // Add tokens to the recipient's balance
+
+        emit Transfer(msg.sender, _to, _value);   // Emit a transfer event
     }
 
-    // Function to burn tokens from the caller's address
+    // Function to burn tokens from the sender's address
     function burn(uint256 _value) external {
-        require(balanceOf[msg.sender] >= _value, "Insufficient balance");  // Check if the caller has enough tokens
-        balanceOf[msg.sender] -= _value;        // Deduct tokens from the caller's balance
+        require(balanceOf[msg.sender] >= _value, "Insufficient balance");  // Check if the sender has enough tokens
+
+        balanceOf[msg.sender] -= _value;         // Deduct tokens from the sender's balance
         totalSupply -= _value;                   // Decrease the total supply of tokens
+
         emit Burn(msg.sender, _value);           // Emit a burn event
+        emit Transfer(msg.sender, address(0), _value);  // Emit a transfer event to address(0) indicating the tokens are burned
     }
 
     // Function to mint new tokens and assign them to a specified address
     function mint(address _to, uint256 _value) external onlyOwner {
+        require(_to != address(0), "Invalid recipient");            // Check if the recipient address is valid
+
         balanceOf[_to] += _value;                 // Add tokens to the recipient's balance
         totalSupply += _value;                    // Increase the total supply of tokens
+
         emit Mint(_to, _value);                    // Emit a mint event
+        emit Transfer(address(0), _to, _value);    // Emit a transfer event from address(0) to the recipient
     }
 }
