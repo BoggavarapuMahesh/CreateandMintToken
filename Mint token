@@ -31,29 +31,31 @@ contract MyToken {
     }
 
     // Function to transfer tokens from the sender's address to another address
-    function transfer(address _to, uint256 _value) external {
-        require(_to != address(0), "Invalid recipient");            // Check if the recipient address is valid
-        require(balanceOf[msg.sender] >= _value, "Insufficient balance");  // Check if the sender has enough tokens
+    function transfer(address _to, uint256 _value) public returns (bool) {
+        require(amount > 0, "Amount must be greater than 0");
+        require(to != address(0), "Recipient address must not be 0");
+        require(balanceOf[msg.sender] >= _value, "Insufficient balance");
 
-        balanceOf[msg.sender] -= _value;         // Deduct tokens from the sender's balance
-        balanceOf[_to] += _value;                 // Add tokens to the recipient's balance
+        balanceOf[msg.sender] -= _value;
+        balanceOf[to] += _value;
 
-        emit Transfer(msg.sender, _to, _value);   // Emit a transfer event
+        emit Transfer(msg.sender, to, _value);
+        return true;
     }
 
     // Function to burn tokens from the sender's address
-    function burn(uint256 _value) external {
-        require(balanceOf[msg.sender] >= _value, "Insufficient balance");  // Check if the sender has enough tokens
+    function burn(uint256 _value) public {
+        require(balanceOf[msg.sender] >= _value, "Insufficient balance");
 
-        balanceOf[msg.sender] -= _value;         // Deduct tokens from the sender's balance
-        totalSupply -= _value;                   // Decrease the total supply of tokens
+        balanceOf[msg.sender] -= _value;
+        totalSupply -= _value;
 
-        emit Burn(msg.sender, _value);           // Emit a burn event
+        emit Burn(msg.sender, _value);
         emit Transfer(msg.sender, address(0), _value);  // Emit a transfer event to address(0) indicating the tokens are burned
     }
 
     // Function to mint new tokens and assign them to a specified address
-    function mint(address _to, uint256 _value) external onlyOwner {
+    function mint(address _to, uint256 _value) public onlyOwner {
         require(_to != address(0), "Invalid recipient");            // Check if the recipient address is valid
 
         balanceOf[_to] += _value;                 // Add tokens to the recipient's balance
@@ -62,4 +64,29 @@ contract MyToken {
         emit Mint(_to, _value);                    // Emit a mint event
         emit Transfer(address(0), _to, _value);    // Emit a transfer event from address(0) to the recipient
     }
-}
+
+    // ERC20-compliant functions
+    function totalSupply() public view returns (uint256) {
+        return totalSupply;
+    }
+
+    function balanceOf(address account) public view returns (uint256) {
+        return balanceOf[account];
+    }
+
+    function transfer(address to, uint256 amount) public returns (bool) {
+        return _transfer(msg.sender, to, amount);
+    }
+
+    function approve(address spender, uint256 amount) public returns (bool) {
+        return _approve(msg.sender, spender, amount);
+    }
+
+    function allowance(address owner, address spender) public view returns (uint256) {
+        return allowance[owner][spender];
+    }
+
+    function transferFrom(address from, address to, uint256 amount) public returns (bool) {
+        return _transfer(from, to, amount);
+    }
+
