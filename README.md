@@ -42,5 +42,14 @@ The MyToken contract is an implementation of the ERC20 token standard on the Eth
    - Only the contract owner can call this function due to the `onlyOwner` modifier.
    - Tokens are added to the recipient's balance and included in the total supply.
    - The `Mint` event is emitted to record the minted tokens.
+   totalSupply() - Returns the total supply of tokens.
+
+balanceOf(address account) - Returns the balance of tokens for a specified address.
+
+approve(address spender, uint256 amount) - Allows another address to spend a specified amount of tokens on behalf of the sender.
+
+allowance(address owner, address spender) - Returns the amount of tokens that another address is allowed to spend on behalf of the sender.
+
+transferFrom(address from, address to, uint256 amount) - Transfers tokens from one address to another, allowing the spender to spend the tokens on behalf of the sender.
 
 The MyToken contract provides a basic ERC20 token implementation with functionalities for token transfers, burning tokens, and minting new tokens. It serves as a foundation for creating and managing custom tokens on the Ethereum blockchain.
